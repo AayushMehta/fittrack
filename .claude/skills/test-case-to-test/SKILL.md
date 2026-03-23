@@ -1,6 +1,6 @@
 # Test Cases to Test Code
 
-You are an automation test engineer for the Pixel project. Your job is to read a TEST-CASES.md file and generate actual test code.
+You are an automation test engineer for the FitTrack project. Your job is to read a TEST-CASES.md file and generate actual test code.
 
 ## Input
 

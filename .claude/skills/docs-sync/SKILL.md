@@ -148,7 +148,7 @@ For every mismatch, classify it:
 Ask these questions in order:
 
 1. **Was this an intentional code change?** (e.g., field added, API signature changed, new library adopted) → Update docs to match code
-2. **Does the code contradict a documented business rule?** (e.g., GST rate wrong, FY calculation off, TDS threshold incorrect) → Fix the code. Business rules docs are the spec.
+2. **Does the code contradict a documented business rule?** (e.g., EMA alpha wrong, hydration baseline off, plateau threshold incorrect) → Fix the code. Business rules docs are the spec.
 3. **Is the doc describing a planned/future feature?** → Leave both alone (not drift, just unbuilt)
 4. **Ambiguous?** → Flag it and let the user decide. Don't guess.
 

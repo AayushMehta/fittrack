@@ -1,15 +1,15 @@
 # Create Spec
 
-You are a senior technical writer for the Pixel project. Your job is to create a detailed SPEC.md file for a feature module by reading the project docs and the actual codebase, then writing a comprehensive specification.
+You are a senior technical writer for the FitTrack project. Your job is to create a detailed SPEC.md file for a feature module by reading the project docs and the actual codebase, then writing a comprehensive specification.
 
 ## Input
 
 Arguments: $ARGUMENTS
 
 Supported arguments:
-- A module name (e.g., `clients`, `engagements`, `dashboard`, `resources`, `invoices`)
-- A route path (e.g., `/clients`, `/engagements`, `/dashboard`)
-- A feature doc path (e.g., `docs/features/01-client-management.md`)
+- A module name (e.g., `log`, `dashboard`, `progress`, `insights`, `goals`)
+- A route path (e.g., `/log`, `/progress`, `/dashboard`)
+- A feature doc path (e.g., `docs/features/01-daily-logging.md`)
 - `all` — generate specs for all modules that have a feature doc but no SPEC.md yet
 
 If no argument is provided, ask the user which module to create a spec for.
@@ -56,9 +56,9 @@ Read these files in parallel (skip any that don't exist):
 
 **Read the template:**
 - Find an existing SPEC.md in the project to use as a structural template. Look in:
-  - `src/app/(dashboard)/settings/SPEC.md`
+  - `src/app/(dashboard)/goals/SPEC.md`
   - `src/app/(auth)/login/SPEC.md`
-  - `src/app/(dashboard)/clients/SPEC.md`
+  - `src/app/(dashboard)/log/SPEC.md`
   - Use the first one found as the template for structure and tone.
 
 **Retroactive mode — also read:**
@@ -251,9 +251,9 @@ Print a summary:
 - **Test counts must be accurate.** In retroactive mode, count `it(` and `test(` calls in each test file. Don't estimate.
 - **Keep it concise but complete.** Every section should earn its place. If a section would be empty or trivial, omit it. But don't skip sections that have real content.
 - **Module name mapping**: Use these conventions for file paths:
-  - `/clients` → schema: `client.schema.ts`, service: `client.service.ts`, tests: `client*`
-  - `/engagements` → schema: `engagement.schema.ts`, service: `engagement.service.ts`, tests: `engagement*`
-  - `/resources` → schema: `resource.schema.ts`, service: `resource.service.ts`, tests: `resource*`
-  - `/invoices` → schema: `invoice.schema.ts`, service: `invoice.service.ts`, tests: `invoice*`
-  - etc.
+  - `/log` → schema: `log.schema.ts`, service: `log.service.ts`, tests: `log*`
+  - `/progress` → schema: `weekly.schema.ts`, service: `progress.service.ts`, tests: `progress*`
+  - `/insights` → service: `insights.service.ts`, tests: `insights*`
+  - `/goals` → schema: `goals.schema.ts`, service: `goals.service.ts`, tests: `goals*`
+  - `/settings` → service: `user.service.ts`, tests: `user*`
 - **For `all` mode**: Process modules in phase order from `implementation-phases.md`. Skip modules that already have a SPEC.md. Print progress as each spec is created.

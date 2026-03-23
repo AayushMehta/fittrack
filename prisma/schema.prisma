@@ -1,5 +1,5 @@
 // FitTrack — Prisma Schema
-// Database: PostgreSQL
+// Database: SQLite (dev) — swap provider + DATABASE_URL for PostgreSQL in prod
 // Docs: docs/database-schema.md
 
 generator client {
@@ -7,21 +7,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
-}
-
-// ---------------------------------------------------------------------------
-// Enums
-// ---------------------------------------------------------------------------
-
-enum WorkoutType {
-  STRENGTH
-  CARDIO
-  HIIT
-  YOGA
-  SPORTS
-  OTHER
 }
 
 // ---------------------------------------------------------------------------
@@ -48,15 +35,15 @@ model User {
 model DailyLog {
   id     String   @id @default(cuid())
   userId String
-  date   DateTime @db.Date // morning, fasted
+  date   DateTime // morning, fasted (stored as ISO string in SQLite)
 
   // --- Required ---
   weight Float // kg
 
   // --- Activity ---
   steps       Int?
-  workedOut   Boolean     @default(false)
-  workoutType WorkoutType?
+  workedOut   Boolean @default(false)
+  workoutType String? // STRENGTH | CARDIO | HIIT | YOGA | SPORTS | OTHER — validated in app
 
   // --- Nutrition (optional but recommended) ---
   caloriesIntake Int?
@@ -84,7 +71,7 @@ model DailyLog {
 model WeeklyMetric {
   id            String   @id @default(cuid())
   userId        String
-  weekStartDate DateTime @db.Date // Monday of the week
+  weekStartDate DateTime // Monday of the week (stored as ISO string in SQLite)
 
   // --- Body measurements ---
   waistCm           Float?
@@ -110,7 +97,7 @@ model WeeklyMetric {
 model ComputedMetric {
   id     String   @id @default(cuid())
   userId String
-  date   DateTime @db.Date
+  date   DateTime // stored as ISO string in SQLite
 
   // --- Weight smoothing ---
   emaWeight    Float // exponential moving average (α=0.3)

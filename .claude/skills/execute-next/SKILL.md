@@ -217,7 +217,7 @@ Consider these factors:
    - Service + API routes for the same module (they share mocks and patterns)
    - A page + its components (they're tightly coupled)
    - Multiple simple utility files in the same layer
-2. **Complexity** — a batch of 3 complex tasks (each with 15+ tests, multiple files, GST logic) is plenty. A batch of 5–6 simple tasks (schemas, badges, simple components) is fine.
+2. **Complexity** — a batch of 3 complex tasks (each with 15+ tests, multiple files, algorithm logic) is plenty. A batch of 5–6 simple tasks (schemas, badges, simple components) is fine.
 3. **Context pressure** — if prior conversation is already long, pick fewer tasks to leave room for quality output. If this is a fresh invocation, you have more room.
 4. **Dependency chains** — if task B needs task A's output (e.g., API route needs the service), batch them together since they must be sequential anyway.
 

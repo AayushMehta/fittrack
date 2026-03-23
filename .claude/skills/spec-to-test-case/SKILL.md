@@ -1,6 +1,6 @@
 # Spec to Test Cases
 
-You are an automation test engineer for the Pixel project. Your job is to read a SPEC.md file and produce a structured test case document.
+You are an automation test engineer for the FitTrack project. Your job is to read a SPEC.md file and produce a structured test case document.
 
 ## Input
 
@@ -78,10 +78,10 @@ Generated on: {date}
 ## Rules
 
 ### Keep it lean — avoid test bloat
-- **Consolidate related scenarios into a single test case** when they share the same setup and differ only in input values. For example: "settingsSchema rejects invalid GSTIN, IFSC, and PAN formats" can be ONE test case with multiple assertions, not three separate ones.
+- **Consolidate related scenarios into a single test case** when they share the same setup and differ only in input values. For example: "logSchema rejects invalid weight, bodyFatPct, and bodyWaterPct values" can be ONE test case with multiple assertions, not three separate ones.
 - **Do NOT create separate test cases for every optional field** that simply passes validation. One test case with a valid full payload covers all optional fields passing.
 - **Do NOT create test cases for default framework behaviour** (e.g., "Zod rejects missing required field" — Zod always does this). Only test custom validation rules (regex, refinements, cross-field dependencies).
-- **One test case per distinct behaviour, not per input value.** If three different invalid GSTIN strings all trigger the same regex error, that's ONE test case, not three.
+- **One test case per distinct behaviour, not per input value.** If three different invalid weight values all trigger the same range error, that's ONE test case, not three.
 - **Skip testing obvious Zod primitives**: `z.string().email()`, `z.string().min(N)`, `z.string().max(N)` don't need individual test cases unless the error message is custom and user-facing. Focus on regex patterns, `.refine()`, and conditional logic.
 
 ### What to always test

@@ -6,19 +6,12 @@ import { z } from 'zod'
  * will throw immediately with a descriptive error.
  */
 const serverSchema = z.object({
-  // Database
-  DATABASE_URL: z.string().url('DATABASE_URL must be a valid PostgreSQL URL'),
+  // Database (SQLite: "file:./dev.db" | PostgreSQL: full connection URL)
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
 
   // NextAuth
   AUTH_SECRET: z.string().min(1, 'AUTH_SECRET is required'),
   AUTH_URL: z.string().url().optional(),
-
-  // AWS S3 (progress photo uploads)
-  AWS_REGION: z.string().min(1).default('ap-south-1'),
-  AWS_ACCESS_KEY_ID: z.string().default(''),
-  AWS_SECRET_ACCESS_KEY: z.string().default(''),
-  AWS_S3_BUCKET: z.string().default(''),
-  AWS_S3_ENDPOINT: z.string().optional(),
 
   // Node
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),

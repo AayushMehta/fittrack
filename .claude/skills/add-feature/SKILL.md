@@ -71,7 +71,7 @@ Before designing anything, identify gaps in the feature description. Think about
 
 1. **Users & access**: Who uses this? Which roles? Any new roles needed?
 2. **Data model**: What new entities/fields are needed? Relationships to existing models?
-3. **Business rules**: Any calculations, validations, status workflows, or Indian compliance (GST, TDS, FY)?
+3. **Business rules**: Any calculations, validations, or algorithm changes (EMA, confidence, fat loss, hydration correction)?
 4. **UI scope**: List page? Detail page? Form? Dashboard widget? Export?
 5. **Integrations**: S3 uploads? Email notifications? PDF generation? External APIs?
 6. **Edge cases**: What happens on delete? Concurrent edits? Empty states?
@@ -361,9 +361,9 @@ Use the `engineering-agent` to start building, or review the plan first.
 - **Ask before designing**. Never skip Step 3 (clarifying questions). A 2-minute Q&A saves hours of rework. The only exception is if the feature description is comprehensive enough that all questions have obvious answers.
 - **Don't implement anything**. This skill produces documentation and a plan ONLY. No code changes except to `prisma/schema.prisma` (schema updates) and docs. Implementation happens separately via the `engineering-agent`.
 - **Respect what's built**. Never modify completed phase checkboxes or rewrite existing docs sections. Add to them. The exception is fixing clear factual errors discovered during analysis.
-- **Follow existing patterns**. New modules should follow the exact same structure as existing ones. Look at how clients, invoices, or expenses are structured and mirror it.
+- **Follow existing patterns**. New modules should follow the exact same structure as existing ones. Look at how log, progress, or goals are structured and mirror it.
 - **Keep the plan executable**. Each task in the phase should be a well-scoped unit of work. If a task is too broad (e.g., "build the entire UI"), split it into specific page/component tasks.
-- **Think about the Indian business context**. This is an Indian software services company tool. Consider: financial year (April-March), GST implications, TDS, INR as base currency, Indian compliance requirements.
+- **Think about the fitness domain context**. Consider: physiological accuracy, data immutability (raw logs never modified), derived metrics always recomputed, null = absent not zero, algorithm constants in docs/business-rules.md.
 - **Don't add unnecessary dependencies**. If the feature can be built with the existing tech stack, don't introduce new libraries. If a new library is truly needed, call it out explicitly and add it to the tech stack docs.
 - **Cross-cutting features need special care**. If the feature touches multiple modules, list every module affected and what changes in each. The implementation plan should be ordered so that the core infrastructure is built first, then module-by-module integration.
 - **Schema changes are real**. Unlike other docs, changes to `prisma/schema.prisma` are actual code. Ensure they compile (`npx prisma validate`) and are consistent with the existing schema style. The migration will be run during implementation, not now.

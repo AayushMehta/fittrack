@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(DATABASE_URL=\"file:./dev.db\" pnpm db:migrate --name init)"
+    ]
+  }
+}
