@@ -1,0 +1,158 @@
+// FitTrack — Prisma Schema
+// Database: PostgreSQL
+// Docs: docs/database-schema.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum WorkoutType {
+  STRENGTH
+  CARDIO
+  HIIT
+  YOGA
+  SPORTS
+  OTHER
+}
+
+// ---------------------------------------------------------------------------
+// Models
+// ---------------------------------------------------------------------------
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String   // bcrypt hash — never store plaintext
+  timezone  String   @default("Asia/Kolkata")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  dailyLogs       DailyLog[]
+  weeklyMetrics   WeeklyMetric[]
+  computedMetrics ComputedMetric[]
+  goals           UserGoal?
+}
+
+/// One entry per user per day. Immutable after creation — corrections require a new entry.
+/// Raw data is never overwritten; derived data lives in ComputedMetric.
+model DailyLog {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime @db.Date // morning, fasted
+
+  // --- Required ---
+  weight Float // kg
+
+  // --- Activity ---
+  steps       Int?
+  workedOut   Boolean     @default(false)
+  workoutType WorkoutType?
+
+  // --- Nutrition (optional but recommended) ---
+  caloriesIntake Int?
+  proteinIntake  Float? // grams
+  carbIntake     Float? // grams
+  sodiumIntake   Int? // mg
+
+  // --- BIA device readings (optional, intelligently corrected) ---
+  bodyFatPct         Float? // % from BIA scale — raw, uncorrected
+  skeletalMuscleMass Float? // kg from BIA scale
+  bodyWaterPct       Float? // % from BIA scale
+
+  // --- Lifestyle (optional) ---
+  sleepHours Float?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+/// One entry per user per week (week starts Monday).
+model WeeklyMetric {
+  id            String   @id @default(cuid())
+  userId        String
+  weekStartDate DateTime @db.Date // Monday of the week
+
+  // --- Body measurements ---
+  waistCm           Float?
+  progressPhotoUrl  String? // S3 presigned URL
+
+  // --- Strength tracking (optional) ---
+  benchPressPeak     Float? // kg, peak for the week
+  squatPeak          Float? // kg
+  deadliftPeak       Float? // kg
+  otherStrengthNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStartDate])
+  @@index([userId, weekStartDate])
+}
+
+/// Computed/derived metrics. Always recalculated from DailyLog — never user-editable.
+/// Stores both smoothed weight signals and body composition estimates.
+model ComputedMetric {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime @db.Date
+
+  // --- Weight smoothing ---
+  emaWeight    Float // exponential moving average (α=0.3)
+  rollingAvg7d Float? // 7-day simple moving average
+
+  // --- Body composition (physiologically corrected) ---
+  trueFatPct        Float? // BIA fat% after hydration correction
+  estimatedFatMass  Float? // kg
+  estimatedLeanMass Float? // kg
+
+  // --- Confidence scoring (0–100 each) ---
+  confidenceScore Float? // overall: (protein + training + activity) / 3
+  proteinScore    Float? // actual protein / goal protein × 100
+  trainingScore   Float? // workouts this week / weekly target × 100
+  activityScore   Float? // avg steps 7d / daily step goal × 100
+
+  // --- Alerts (array of alert objects) ---
+  // Shape: [{ type: string, message: string, severity: "info"|"warning"|"critical" }]
+  alerts Json @default("[]")
+
+  computedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+/// User-defined fitness targets. One row per user (upsert pattern).
+model UserGoal {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  targetWeight       Float? // kg
+  targetBodyFatPct   Float? // %
+  dailyCalorieTarget Int? // kcal
+  dailyProteinTarget Float? // grams
+  dailyStepsTarget   Int? // default 8000
+  weeklyWorkoutTarget Int? // default 3
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
