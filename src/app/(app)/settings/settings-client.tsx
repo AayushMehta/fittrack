@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useRouter } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import { toast } from 'sonner'
 
 const inputClass =
@@ -39,6 +40,8 @@ interface Profile {
 export function SettingsClient({ profile }: { profile: Profile | null }) {
   const router = useRouter()
   const [pwLoading, setPwLoading] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [deleteLoading, setDeleteLoading] = useState(false)
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -61,6 +64,20 @@ export function SettingsClient({ profile }: { profile: Profile | null }) {
       router.refresh()
     } else {
       toast.error('Failed to update profile')
+    }
+  }
+
+  async function onDeleteAccount() {
+    setDeleteLoading(true)
+    try {
+      const res = await fetch('/api/settings/account', { method: 'DELETE' })
+      if (res.ok) {
+        await signOut({ callbackUrl: '/login' })
+      } else {
+        toast.error('Failed to delete account')
+      }
+    } finally {
+      setDeleteLoading(false)
     }
   }
 
@@ -147,6 +164,32 @@ export function SettingsClient({ profile }: { profile: Profile | null }) {
           {pwLoading ? 'Updating…' : 'Update Password'}
         </button>
       </form>
+      {/* Delete account */}
+      <div className="rounded-xl border border-destructive/40 bg-card p-6 shadow-sm space-y-4">
+        <h2 className="font-medium text-destructive">Delete Account</h2>
+        <p className="text-sm text-muted-foreground">
+          Permanently deletes your account and all tracking data. This cannot be undone.
+        </p>
+        <div className="space-y-1">
+          <label htmlFor="deleteConfirm" className="text-sm font-medium">
+            Type <span className="font-mono font-semibold">DELETE</span> to confirm
+          </label>
+          <input
+            id="deleteConfirm"
+            className={inputClass}
+            value={deleteConfirm}
+            onChange={(e) => setDeleteConfirm(e.target.value)}
+            placeholder="DELETE"
+          />
+        </div>
+        <button
+          onClick={onDeleteAccount}
+          disabled={deleteConfirm !== 'DELETE' || deleteLoading}
+          className="rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90 disabled:opacity-40"
+        >
+          {deleteLoading ? 'Deleting…' : 'Delete My Account'}
+        </button>
+      </div>
     </div>
   )
 }

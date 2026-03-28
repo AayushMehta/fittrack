@@ -2,20 +2,15 @@
 
 Full Prisma schema lives at `prisma/schema.prisma`. This document describes each model, its fields, relationships, and design decisions.
 
+> **SQLite note**: The project uses SQLite (`file:./dev.db`) instead of PostgreSQL. Two PostgreSQL-specific features are absent:
+> - `@db.Date` annotations are omitted — `DateTime` fields store full timestamps (UTC midnight used for date-only semantics)
+> - Prisma enums are not supported in SQLite — `workoutType` is stored as `String?` and validated at the application layer
+
 ---
 
-## Enums
+## Enums (application-layer validation only)
 
-```prisma
-enum WorkoutType {
-  STRENGTH
-  CARDIO
-  HIIT
-  YOGA
-  SPORTS
-  OTHER
-}
-```
+`WorkoutType` values accepted by the daily log schema: `STRENGTH | CARDIO | HIIT | YOGA | SPORTS | OTHER`
 
 ---
 

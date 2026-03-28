@@ -13,6 +13,13 @@ const serverSchema = z.object({
   AUTH_SECRET: z.string().min(1, 'AUTH_SECRET is required'),
   AUTH_URL: z.string().url().optional(),
 
+  // Anthropic
+  ANTHROPIC_API_KEY: z.string().min(1, 'ANTHROPIC_API_KEY is required'),
+
+  // Fitbit integration (optional)
+  FITBIT_CLIENT_SECRET: z.string().optional(),
+  FITBIT_SUBSCRIBER_VERIFICATION_CODE: z.string().optional(),
+
   // Node
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 })

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/lib/auth'
 import { goalSchema } from '@/lib/validations/goal'
 import { getGoal, upsertGoal } from '@/lib/services/goal'
+import { recomputeMetrics } from '@/lib/services/computed'
+import { toISODate } from '@/lib/utils'
 
 export async function GET() {
   const session = await auth()
@@ -26,6 +28,8 @@ export async function PUT(request: Request) {
     }
 
     const goal = await upsertGoal(session.user.id, parsed.data)
+    // Goal changes alter confidence score denominators — recompute today's metrics
+    recomputeMetrics(session.user.id, toISODate(new Date())).catch(console.error)
     return NextResponse.json({ data: goal })
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

@@ -141,7 +141,7 @@ trueFatPct = rawBiaFatPct - correctionFactor
 - When hydration is high (`bodyWaterPct > 60%`), BIA underestimates fat% (body appears leaner). We correct upward by subtracting a negative correction → trueFatPct > rawFatPct.
 - When hydration is low (`bodyWaterPct < 60%`), BIA overestimates fat% (body appears fatter). We correct downward → trueFatPct < rawFatPct.
 
-**Bounds**: `trueFatPct` is clamped to `[3%, 60%]` — physiologically valid range.
+**Bounds**: `trueFatPct` is floored at 0 (`Math.max(0, ...)`). No upper clamp is applied.
 
 **Fallback**: If `bodyWaterPct` is not logged, `trueFatPct = rawBiaFatPct` (no correction applied).
 
@@ -164,7 +164,7 @@ IF delta < 0.1 kg → plateau detected
 
 **Alert shape**:
 ```json
-{ "type": "plateau", "message": "Weight hasn't changed in 14 days. Consider adjusting calories or training.", "severity": "warning" }
+{ "type": "PLATEAU", "message": "Weight has barely moved in 14 days. Consider adjusting calories or training.", "severity": "warning" }
 ```
 
 ---
@@ -175,34 +175,34 @@ Alerts are generated and stored in `ComputedMetric.alerts` (JSON array). Multipl
 
 ### Alert: Fat Loss Too Slow
 
-**Trigger**: Weekly EMA delta < 0.2 kg/week for two consecutive weeks, AND user has a `targetWeight` or `targetBodyFatPct` set.
+**Trigger**: 14-day EMA delta implies < 0.1 kg/week loss (i.e. `(ema14dAgo - emaToday) / 2 < 0.1` and ≥ 0).
 
 ```json
-{ "type": "fat_loss_slow", "message": "Fat loss has slowed. Try reducing daily intake by ~100 kcal.", "severity": "info" }
+{ "type": "FAT_LOSS_TOO_SLOW", "message": "Fat loss pace is slow. Review caloric deficit.", "severity": "info" }
 ```
 
 ### Alert: Fat Loss Too Fast
 
-**Trigger**: Weekly EMA delta > 1.0 kg/week for one week.
+**Trigger**: 14-day EMA delta implies > 0.75 kg/week loss.
 
 ```json
-{ "type": "fat_loss_fast", "message": "You're losing weight faster than recommended. Increase intake by ~100 kcal to protect muscle.", "severity": "warning" }
+{ "type": "FAT_LOSS_TOO_FAST", "message": "Losing weight too fast. Increase calories to protect muscle.", "severity": "warning" }
 ```
 
 ### Alert: Muscle Loss Risk
 
-**Trigger**: `estimatedLeanMass` decreases by > 0.3 kg in 7 days.
+**Trigger**: `estimatedLeanMass` decreases by > 0.5 kg compared to 7 days ago.
 
 ```json
-{ "type": "muscle_loss_risk", "message": "Lean mass is dropping. Increase protein intake and ensure you're resistance training.", "severity": "warning" }
+{ "type": "MUSCLE_LOSS_RISK", "message": "Lean mass is dropping. Increase protein and review training.", "severity": "critical" }
 ```
 
 ### Alert: Low Protein
 
-**Trigger**: `proteinScore < 60` for 7 consecutive days.
+**Trigger**: Today's `proteinIntake` is below 80% of `dailyProteinTarget` (single-day check).
 
 ```json
-{ "type": "low_protein", "message": "Protein intake has been below target for 7 days. Prioritise protein to retain muscle.", "severity": "info" }
+{ "type": "LOW_PROTEIN", "message": "Protein intake is below target today. Prioritise protein to retain muscle.", "severity": "warning" }
 ```
 
 ### Alert: Hydration Affecting BIA
@@ -218,12 +218,11 @@ Alerts are generated and stored in `ComputedMetric.alerts` (JSON array). Multipl
 ## 8. Computation Trigger
 
 `ComputedMetric` is recalculated whenever:
-1. A new `DailyLog` is created (POST `/api/logs`)
-2. A new `WeeklyMetric` is created or updated
-3. `UserGoal` is updated (changes confidence sub-score denominators)
-4. User explicitly triggers recalculation (GET `/api/computed` with `recalculate=true`)
+1. A new `DailyLog` is created or corrected (POST/PUT `/api/logs`)
+2. A `WeeklyMetric` is created or updated (POST `/api/weekly`, PUT `/api/weekly/[weekStart]`)
+3. `UserGoal` is updated (PUT `/api/goals`) — changes confidence sub-score denominators
 
-Computation is synchronous for the current day's entry. Historical recomputation (e.g. after a goal update) is batched and may be asynchronous.
+All three trigger a fire-and-forget `recomputeMetrics(userId, today)` that recomputes the current day's `ComputedMetric` asynchronously.
 
 ---
 

@@ -3,5 +3,18 @@
     "allow": [
       "Bash(DATABASE_URL=\"file:./dev.db\" pnpm db:migrate --name init)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/scripts/sync-product-context.sh"
+          }
+        ]
+      }
+    ]
   }
 }

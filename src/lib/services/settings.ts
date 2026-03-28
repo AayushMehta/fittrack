@@ -1,6 +1,11 @@
 import { db } from '@/lib/db'
 import bcrypt from 'bcryptjs'
 
+export async function deleteAccount(userId: string): Promise<void> {
+  // All child records cascade-delete via Prisma schema relations
+  await db.user.delete({ where: { id: userId } })
+}
+
 export async function getProfile(userId: string) {
   return db.user.findUnique({
     where: { id: userId },

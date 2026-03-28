@@ -28,7 +28,7 @@ export function AppNav() {
   const pathname = usePathname()
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 flex w-56 flex-col border-r bg-sidebar">
+    <aside className="sticky top-0 h-screen w-56 shrink-0 flex flex-col border-r bg-sidebar overflow-y-auto">
       <div className="flex h-14 items-center gap-2 border-b px-4">
         <Activity className="h-5 w-5 text-sidebar-primary" />
         <span className="font-semibold text-sidebar-foreground">FitTrack</span>
